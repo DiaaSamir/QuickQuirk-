@@ -20,7 +20,7 @@ app.use(helmet());
 
 //limiting IP requests with this middleware to avoid DOS & brute force attacks
 const limiter = rateLimit({
-  max: 100,
+  max: 90,
   windowMs: 60 * 60 * 1000,
   message: 'Too many requests from this IP, Please try again after an hour!',
 });
