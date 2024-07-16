@@ -1,21 +1,43 @@
+const multer = require('multer');
+const sharp = require('sharp');
 const User = require('./../models/userModel');
 const AppError = require('./../utils/appError');
 const catchAsync = require('./../utils/catchAsync');
 const factory = require('./handlerFactory');
 
-//For files upload
-// const multerStorage = multer.memoryStorage();
-// const multerFilter = (req, file, cb) => {
-//   if (file.mimetype.startsWith('image')) {
-//     cb(null, true);
-//   } else {
-//     cb(new AppError('Not an image!...Please upload an image', 400), false);
-//   }
-// };
-// const upload = multer({
-//   storage: multerStorage,
-//   fileFilter: multerFilter,
-// });
+//Pictures upload
+const multerStorage = multer.memoryStorage();
+
+const multerFilter = (req, file, cb) => {
+  if (file.mimetype.startsWith('image')) {
+    cb(null, true);
+  } else {
+    cb(new AppError('Not an image! Please upload only images.', 400), false);
+  }
+};
+
+const upload = multer({
+  storage: multerStorage,
+  fileFilter: multerFilter,
+});
+
+exports.uploadUserPhoto = upload.single('photo');
+
+exports.resizeUserPhoto = catchAsync(async (req, res, next) => {
+  if (!req.file) return next();
+
+  req.file.filename = `user-${req.user.id}-${Date.now()}.jpeg`;
+
+  await sharp(req.file.buffer)
+    .resize(500, 500)
+    .toFormat('jpeg')
+    .jpeg({ quality: 90 })
+    .toFile(`public/img/users/${req.file.filename}`);
+
+  next();
+});
+
+//...........................................................................................
 
 //For filtering fields
 const filterObj = (obj, ...allowdFields) => {
@@ -39,31 +61,7 @@ exports.updateUser = factory.updateOne(User, 'user');
 
 //Operations for the user
 
-// exports.uploadSinglePhoto = upload.single('photo');
-
-// exports.resizeUserPhoto = catchAsync(async (req, res, next) => {
-//   if (!req.file) {
-//     return next();
-//   }
-
-//   //uploading image cover
-
-//   req.file.filename = `${req.user.name}-${
-//     req.user.id
-//   }-${Date.now()}-photo.jpeg`;
-
-//   await sharp(req.file.buffer)
-//     .resize(500, 500)
-//     .toFormat('jpeg')
-//     .jpeg({ quality: 90 })
-//     .toFile(`public/img/users/${req.file.filename}`);
-
-//   next();
-// });
-
 exports.updateMe = catchAsync(async (req, res, next) => {
-  console.log(req.file);
-  console.log(req.body);
   //DO NOT let the user update his password here
   if (req.body.password || req.body.passwordConfirm) {
     return next(

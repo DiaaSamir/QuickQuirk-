@@ -3,3 +3,6 @@ node_modules/
 
 # Ignore all env files
 *.env
+
+#ignore public folder
+public/

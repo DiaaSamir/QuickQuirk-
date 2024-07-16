@@ -36,17 +36,7 @@ const redisClientSetEx = async (cacheKey, doc) => {
   }
 };
 
-const redisClientFlushAll = async () => {
-  try {
-    await redisClient.flushDb();
-    console.log('Redis cache flushed successfully');
-  } catch (err) {
-    console.error('Error flushing Redis cache', err);
-  }
-};
-
 module.exports = {
   redisClient,
   redisClientSetEx,
-  redisClientFlushAll,
 };

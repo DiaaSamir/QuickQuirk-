@@ -41,7 +41,7 @@ app.use(
 app.use(express.json({ limit: '50kb' }));
 
 //serving static files
-app.use(express.static(`${__dirname}/uploads`));
+app.use(express.static(`${__dirname}/public`));
 
 app.use(express.json());
 
