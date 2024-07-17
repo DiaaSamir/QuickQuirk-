@@ -1,11 +1,13 @@
-const errorController = require('./controllers/errorController');
 const express = require('express');
+const schedule = require('node-schedule');
 const xss = require('xss-clean');
 const hpp = require('hpp');
 const rateLimit = require('express-rate-limit');
 const helmet = require('helmet');
 const mongoSanitize = require('express-mongo-sanitize');
 
+const User = require('./models/userModel');
+const errorController = require('./controllers/errorController');
 const productRouter = require('./routes/productRoutes');
 const reviewRouter = require('./routes/reviewRoutes');
 const userRouter = require('./routes/userRoutes');
@@ -51,6 +53,17 @@ app.use('/api/v1/users', userRouter);
 app.use('/api/v1/addToCart', addToCartRouter);
 app.use('/api/v1/checkout', paymentRouter);
 app.use('/api/v1/myOrders', pastOrdersRouter);
+
+schedule.scheduleJob('0 0 * * *', async () => {
+  const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+
+  // Find and delete users who have been inactive for 30 days or more
+  const result = await User.deleteMany({
+    active: false,
+    lastLoggedIn: { $lte: thirtyDaysAgo },
+  });
+  console.log(`Deleted ${result.deletedCount} inactive users.`);
+});
 
 app.all('*', (req, res, next) => {
   res.status(404).json({

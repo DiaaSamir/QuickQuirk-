@@ -1,21 +1,20 @@
 version: '3.9'
 
 services:
-  # MongoDB service
-  # mongodb:
-  #   container_name: db_container
-  #   image: mongo:6.8.0
-  #   restart: always
-  #   volumes:
-  #     - mongodb_data:/data/db
+  #MongoDB service
+  mongodb:
+    container_name: db_container
+    image: mongo:latest
+    restart: always
+    volumes:
+      - mongodb_data:/data/db
 
   # Redis service
   redis:
     container_name: redis_container
     image: redis:latest
-    environment:
-      REDIS_URL: ${REDIS_URL}
-      REDIS_EXPIRATION: ${REDIS_EXPIRATION}
+    env_file:
+      - ./config.env
     volumes:
       - redis_data:/data
 
@@ -28,6 +27,7 @@ services:
       - ./config.env
     depends_on:
       - redis
+      - mongodb
     volumes:
       - mongodb_data:/data/db
 
