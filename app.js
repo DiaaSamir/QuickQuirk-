@@ -1,4 +1,5 @@
 const express = require('express');
+const cors = require('cors');
 const schedule = require('node-schedule');
 const xss = require('xss-clean');
 const hpp = require('hpp');
@@ -19,6 +20,8 @@ const app = express();
 
 //Setting HTTP headers
 app.use(helmet());
+
+app.use(cors());
 
 //limiting IP requests with this middleware to avoid DOS & brute force attacks
 const limiter = rateLimit({
