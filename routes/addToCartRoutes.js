@@ -5,7 +5,7 @@ const authController = require('./../controllers/authController');
 const router = express.Router();
 
 //The middleware below apply the protect and restrictto functions to all routes below it
-router.use(authController.protect, authController.restrictTo('admin', 'user'));
+router.use(authController.protect, authController.restrictTo('user'));
 router
   .route('/myCart')
   .get(addToController.getMyCart)
@@ -20,7 +20,10 @@ router
 //.........................................................................................................
 
 //Thses routes for admins only
-router.use(authController.protect, authController.restrictTo('admin'));
+router.use(
+  authController.protect,
+  authController.restrictTo('admin', 'manager')
+);
 router.route('/').get(addToController.getCarts);
 router.route('/:cartId').delete(addToController.deleteCart);
 module.exports = router;

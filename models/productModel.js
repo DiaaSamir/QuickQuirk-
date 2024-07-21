@@ -7,8 +7,8 @@ const productSchema = new mongoose.Schema(
       required: [true, 'A product must have a brand name'],
     },
     category: {
-      type: String,
-      required: [true, 'A product must have a category'],
+      type: mongoose.Schema.ObjectId,
+      ref: 'Category',
     },
     description: {
       type: String,
@@ -70,5 +70,15 @@ productSchema.virtual('reviews', {
   foreignField: 'product',
   localField: '_id',
 });
+
+//Populating category
+productSchema.pre(/^find/, function (next) {
+  this.populate({
+    path: 'category',
+    select: 'cName',
+  });
+  next();
+});
+
 const Product = mongoose.model('Product', productSchema);
 module.exports = Product;

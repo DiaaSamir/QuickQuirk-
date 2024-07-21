@@ -13,7 +13,7 @@ router
   .get(authController.protect, productController.getAllProducts)
   .post(
     authController.protect,
-    authController.restrictTo('admin'),
+    authController.restrictTo('admin', 'manager'),
     productController.addProduct
   );
 
@@ -21,19 +21,19 @@ router
   .route('/:id')
   .get(
     authController.protect,
-    authController.restrictTo('user', 'admin'),
+    authController.restrictTo('user', 'admin', 'manager'),
     productController.getProduct
   )
   .patch(
     authController.protect,
-    authController.restrictTo('admin'),
+    authController.restrictTo('manager'),
     productController.uploadProductImages,
     productController.resizeProductImages,
     productController.updateProduct
   )
   .delete(
     authController.protect,
-    authController.restrictTo('admin'),
+    authController.restrictTo('managers'),
     productController.deleteProduct
   );
 

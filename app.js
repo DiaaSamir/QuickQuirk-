@@ -15,6 +15,7 @@ const userRouter = require('./routes/userRoutes');
 const addToCartRouter = require('./routes/addToCartRoutes');
 const paymentRouter = require('./routes/paymentRoutes');
 const pastOrdersRouter = require('./routes/pastOrderRoutes');
+const categoryRouter = require('./routes/categoryRoutes');
 
 const app = express();
 
@@ -56,6 +57,7 @@ app.use('/api/v1/users', userRouter);
 app.use('/api/v1/addToCart', addToCartRouter);
 app.use('/api/v1/checkout', paymentRouter);
 app.use('/api/v1/myOrders', pastOrdersRouter);
+app.use('/api/v1/category', categoryRouter);
 
 schedule.scheduleJob('0 0 * * *', async () => {
   const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);

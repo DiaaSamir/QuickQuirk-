@@ -37,8 +37,8 @@ const userSchema = new mongoose.Schema({
 
   role: {
     type: String,
-    enum: ['user', 'admin', 'guest'],
-    default: 'guest',
+    enum: ['user', 'admin', 'manager'],
+    default: 'user',
   },
 
   photo: {
@@ -61,6 +61,11 @@ const userSchema = new mongoose.Schema({
   lastLoggedIn: {
     type: Date,
     default: Date.now(),
+  },
+  rewardPoints: {
+    type: Number,
+    default: 0,
+    max: 100,
   },
 });
 

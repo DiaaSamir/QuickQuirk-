@@ -8,7 +8,7 @@ router
   .route('/')
   .get(
     authController.protect,
-    authController.restrictTo('user', 'admin'),
+    authController.restrictTo('user'),
     pastOrdersController.getMyPastOrders
   );
 

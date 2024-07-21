@@ -6,10 +6,23 @@ const AppError = require('./../utils/appError');
 const PastOrders = require('./../models/pastOrderModel');
 const AddToCart = require('./../models/addToCartModel');
 const Product = require('./../models/productModel');
+const User = require('./../models/userModel');
 
 exports.getCheckoutSession = catchAsync(async (req, res, next) => {
   // Get the cart
   const cart = await AddToCart.findOne({ user: req.user.id });
+
+  //Get the user to check if he already has 100 reward points to get the discount
+  const user = await User.findById(req.user.id);
+  if (!user) {
+    return next(new AppError('User not found', 404));
+  }
+
+  //Check user's point
+  let discount = [];
+  if (user.rewardPoints >= 100) {
+    discount.push({ coupon: 'ycrwPd7h' });
+  }
 
   //Check if cart is empty
   if (!cart || cart.products.length === 0) {
@@ -35,6 +48,7 @@ exports.getCheckoutSession = catchAsync(async (req, res, next) => {
       },
       quantity: el.quantity,
     })),
+    discounts: discount,
   });
 
   // Update the soldNum and stockQuantity for each product in the cart

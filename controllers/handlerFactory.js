@@ -47,7 +47,7 @@ exports.getOne = (Model, modelName, popOptions) =>
     //Get te doc after populaiton
     const doc = await query;
 
-    if (!doc) {
+    if (!doc || doc.length === 0) {
       return next(new AppError(`No ${modelName} found wuth that id`, 404));
     }
 
