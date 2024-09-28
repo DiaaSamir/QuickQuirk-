@@ -51,6 +51,10 @@ exports.getCheckoutSession = catchAsync(async (req, res, next) => {
     discounts: discount,
   });
 
+  //Remove the redeemed points
+  user.rewardPoints = 0;
+  await user.save({ validateBeforeSave: false });
+
   // Update the soldNum and stockQuantity for each product in the cart
   for (let el of cart.products) {
     let product = await Product.findById(el.product._id);
@@ -75,6 +79,9 @@ exports.completePurchase = catchAsync(async (req, res, next) => {
   if (!cart || cart.products.length === 0) {
     return next(new AppError('Your cart is empty! ', 404));
   }
+
+  //Get the user to add 10 points every completed purchase
+  const user = await User.findById(req.user.id);
   // Create a new order with the products from the cart
   const order = await PastOrders.create({
     user: req.user.id,
@@ -84,6 +91,9 @@ exports.completePurchase = catchAsync(async (req, res, next) => {
   cart.products = [];
   await cart.save();
 
+  //Add 10 points
+  user.rewardPoints += 10;
+  await user.save({ validateBeforeSave: false });
   //Respond to the user
   res.status(200).json({
     status: 'success',

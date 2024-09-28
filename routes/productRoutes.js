@@ -13,7 +13,7 @@ router
   .get(authController.protect, productController.getAllProducts)
   .post(
     authController.protect,
-    authController.restrictTo('admin', 'manager'),
+    authController.restrictTo('manager'),
     productController.addProduct
   );
 
@@ -33,7 +33,7 @@ router
   )
   .delete(
     authController.protect,
-    authController.restrictTo('managers'),
+    authController.restrictTo('manager'),
     productController.deleteProduct
   );
 

@@ -16,14 +16,14 @@ router.route('/').get(userController.getAllUsers);
 router
   .route('/:userId')
   .get(userController.getUser)
-  .post(userController.updateUser)
+  .patch(userController.updateUser)
   .delete(userController.deleteUser);
 
 //.................................................................................
 
 //User can control his profile from these routes
 
-router.use(authController.protect, authController.restrictTo('user', 'admin'));
+router.use(authController.protect);
 
 router
   .route('/myAccount')
@@ -34,6 +34,8 @@ router
     userController.resizeUserPhoto,
     userController.updateMe
   );
-router.route('/updateMyPassword').post(authController.updateMyPassword);
+router
+  .route('/updateMyPassword')
+  .post(authController.restrictTo('user'), authController.updateMyPassword);
 
 module.exports = router;

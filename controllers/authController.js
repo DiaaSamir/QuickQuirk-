@@ -66,12 +66,12 @@ exports.login = catchAsync(async (req, res, next) => {
   //check if the email an password exists
   const { email, password } = req.body;
   if (!email || !password) {
-    return new AppError('Please provide email and password', 400);
+    return next(new AppError('Please provide email and password', 400));
   }
   //check if the user exists and chech if the password is correct
   const user = await User.findOne({ email }).select('+password');
   if (!user || !(await user.comparePasswords(password, user.password))) {
-    return new AppError('Email or password is incorrect', 400);
+    return next(new AppError('Email or password is incorrect', 400));
   }
   //Sign the token and respond to user and update last logged in
   user.lastLoggedIn = new Date();

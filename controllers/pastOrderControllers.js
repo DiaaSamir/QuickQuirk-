@@ -1,9 +1,7 @@
-const redisClient = require('./../redisConfig');
-const { redisClientSetEx } = require('./../redisConfig');
+const { redisClient, redisClientSetEx } = require('./../redisConfig');
 const PastOrders = require('./../models/pastOrderModel');
 const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/appError');
-
 
 exports.getMyPastOrders = catchAsync(async (req, res, next) => {
   const userId = req.user.id;

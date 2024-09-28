@@ -273,7 +273,6 @@ exports.getMyCartOrReview = (modelName) =>
   });
 //.........................................................................................................................................
 
-//Here the user can choose whether to update the quantity of a specific product or delete a product in his cart, also he can update one of his reviews
 exports.updateOrRemoveCartProductOrUpdateReview = (
   modelName,
   cartOperationType
@@ -283,82 +282,84 @@ exports.updateOrRemoveCartProductOrUpdateReview = (
     let doc;
     let message;
 
-    //if the entered model name is cart
+    // If the entered model name is cart
     if (modelName === 'cart') {
-      //assign the cache key to the model and id of the user
+      // Assign the cache key to the model and id of the user
       cacheKey = `${modelName}:${req.user.id}`;
 
-      //get product id and the new quantity for modification
+      // Get product id and the new quantity for modification
       const productId = req.params.productId;
       const newQuantity = req.body.quantity;
 
-      //Get user's cart
-      doc = await AddToCart.findOne({ user: req.user.id });
+      // Get user's cart
+      doc = await AddToCart.findOne({ user: req.user.id }).exec(); // Ensure to call exec() to avoid cached queries
 
       // Check if the cart is empty
       if (!doc || !doc.products || doc.products.length === 0) {
         return next(new AppError('You have no items in your cart!', 404));
       }
 
-      //Get the index of the product user wants to update
+      // Get the index of the product user wants to update
       const productIndex = doc.products.findIndex((item) =>
         item.product.equals(productId)
       );
 
-      //If the product exists
+      // If the product does not exist
       if (productIndex === -1) {
         return next(new AppError('No product found with that id!', 404));
       }
 
-      //If the user wants to update
+      // If the user wants to update
       if (cartOperationType === 'update') {
-        //Update the product's quantity
+        // Update the product's quantity
         doc.products[productIndex].quantity = newQuantity;
         message = 'Product quantity updated successfully';
       }
 
-      //if the user wants to delete
+      // If the user wants to delete
       if (cartOperationType === 'delete') {
-        //Delete the product if found
+        // Delete the product if found
         doc.products.splice(productIndex, 1);
         message = 'Product deleted successfully';
       }
 
-      //Save the cart after modification
-      doc = await doc.save();
+      // Save the cart after modification
+      await doc.save(); // Await the save operation to ensure it's completed
 
-      //Invalidate user's cart
+      // Invalidate user's cart
       redisClient.del(cacheKey);
 
-      //if the entered modsel name is review
+      // If the entered model name is review
     } else if (modelName === 'review') {
-      //assign the cache key
+      // Assign the cache key
       cacheKey = `${modelName}:${req.params.id}-${req.user.id}`;
 
-      //Get the review to be updated and update it
-      doc = await Review.findOneAndUpdate(
-        { _id: req.params.id, user: req.user.id },
-        {
-          review: req.body.review,
-          rating: req.body.rating,
-        },
-        { new: true, runValidators: true }
-      );
+      // Get the review to be updated and update it
+      try {
+        doc = await Review.findOneAndUpdate(
+          { _id: req.params.id, user: req.user.id },
+          { review: req.body.review, rating: req.body.rating },
+          { new: true, runValidators: true }
+        );
+      } catch (error) {
+        console.log(error);
+      } // Use exec() to ensure a fresh query
 
-      //If the review not found return the error
+      // If the review not found return the error
       if (!doc) {
         return next(new AppError('No review found with that id!', 404));
       }
 
-      //Invlidate user's review cache
+      // Invalidate user's review cache
       redisClient.del(cacheKey);
+      message = 'Updated your review!';
 
-      //If the entered model name is invalid(not review or cart), return error
+      // If the entered model name is invalid (not review or cart), return error
     } else {
-      return next(new AppError('Invalid model name or cartOPerationType', 400));
+      return next(new AppError('Invalid model name or cartOperationType', 400));
     }
 
-    //respond to the user
+    // Respond to the user
     res.status(200).json({
       status: 'success',
       message,

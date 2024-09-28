@@ -1,5 +1,4 @@
 const mongoose = require('mongoose');
-
 const Product = require('./productModel');
 
 const reviewSchema = new mongoose.Schema(
@@ -35,6 +34,7 @@ const reviewSchema = new mongoose.Schema(
   }
 );
 
+// Static method to calculate average ratings
 reviewSchema.statics.calcAvgRatings = async function (productId) {
   const stats = await this.aggregate([
     {
@@ -61,20 +61,20 @@ reviewSchema.statics.calcAvgRatings = async function (productId) {
   }
 };
 
+// Middleware to update average rating after saving a review
 reviewSchema.post('save', function () {
   this.constructor.calcAvgRatings(this.product);
 });
 
-reviewSchema.pre(/^findOneAnd/, async function (next) {
-  this.r = await this.findOne();
-  next();
+// Use a different approach for findOneAndUpdate hooks
+reviewSchema.post(/^findOneAnd/, async function (doc) {
+  // `doc` contains the document after the update
+  if (doc) {
+    await doc.constructor.calcAvgRatings(doc.product);
+  }
 });
 
-reviewSchema.post(/^findOneAnd/, async function (next) {
-  await this.r.constructor.calcAvgRatings(this.r.product);
-  next();
-});
-
+// Pre-query middleware to populate user information
 reviewSchema.pre(/^find/, function (next) {
   this.populate({
     path: 'user',

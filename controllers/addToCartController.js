@@ -28,7 +28,7 @@ exports.addProductToCart = catchAsync(async (req, res, next) => {
   const productId = req.params.productId;
   const newQuantity = req.body.quantity || 1;
 
-  //Get user's cart
+  // Get user's cart
   let myCart = await AddToCart.findOne({ user: req.user.id });
 
   // If the cart does not exist, create a new one
@@ -36,9 +36,9 @@ exports.addProductToCart = catchAsync(async (req, res, next) => {
     myCart = await AddToCart.create({ user: req.user.id, products: [] });
   }
 
-  //Check if the already in user's cart, if yes then increase the quantity of the product in user's cart by th value user provided , if no then add it
+  // Check if the product is already in the user's cart
   const productIndex = myCart.products.findIndex(
-    (item) => item.product.id.toString() === productId
+    (item) => item.product && item.product.id.toString() === productId
   );
 
   if (productIndex > -1) {
@@ -52,14 +52,16 @@ exports.addProductToCart = catchAsync(async (req, res, next) => {
     });
   }
 
+  // Clear the cache
   redisClient.del(cacheKey);
 
-  //Save the updated cart
+  // Save the updated cart
   await myCart.save();
 
-  //Respond to the user
+  // Respond to the user
   res.status(200).json({
     status: 'success',
     message: 'Product added successfully',
+    cart: myCart, // Optional: Include the updated cart in the response
   });
 });
