@@ -24,4 +24,4 @@ You can find the Postman documentation for this project [here](https://documente
 ## Installation
 1. Clone the repository
    ```bash
-   git clone https://github.com/yourusername/QuickQuirkMarket.git
+   git clone https://github.com/DiaaSamir/QuickQuirk-.git
